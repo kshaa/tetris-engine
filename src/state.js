@@ -31,7 +31,7 @@ define(function() {
         // Create empty field
         this.frame.field = new Array(this.settings.height)
         for (i = 0; i < this.settings.height; i++) {
-            field[i] = new Array(this.settings.width).fill(0)
+            this.frame.field[i] = new Array(this.settings.width).fill(0)
         }
     }
 })

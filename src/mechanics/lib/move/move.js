@@ -102,7 +102,6 @@ define(["require", "./lib/srs/srs", "./lib/srs/lib/rotate/rotate", "./lib/valida
                 switch(move.toLowerCase()) {
                     case 'cw':
                         pieces = this._srs.rotateClockwise(piece)
-                        console.log(pieces)
                         break
                     case 'ccw':
                         pieces = this._srs.rotateAnticlockwise(piece)
@@ -127,7 +126,6 @@ define(["require", "./lib/srs/srs", "./lib/srs/lib/rotate/rotate", "./lib/valida
                         pieces.push(this._drop(clone))
                         break
                     default:
-                        console.log('Unknown movement key in Mechanics: "' + move.toLowerCase() + '"')
                         break
                 }
                 return this._validator.check(pieces)

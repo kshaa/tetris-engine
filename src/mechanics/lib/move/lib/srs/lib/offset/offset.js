@@ -31,7 +31,6 @@ function(Wallkicks) {
                 var y = w1[i][1] - w2[i][1]
                 offsets[i] = [x, y]
             }
-            console.log(offsets)
             return offsets
         }
         this._rotations = ['0', 'r', '2', 'l']
