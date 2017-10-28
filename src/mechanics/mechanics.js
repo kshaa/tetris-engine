@@ -13,7 +13,6 @@ define(function(require) {
                     for (j = 0; j < t[0].length; j++) {
                         if (t[i][j] != 0) {
                             let val = t[i][j]
-                            console.log(justfield, piece, i, j)
                             justfield[piece.y + i][piece.x + j] = val ? piece.key : '0'
                         }
                     }
@@ -52,7 +51,6 @@ define(function(require) {
                             f.splice(i+1, f.length - i - 1)
                         )
                     )
-                    console.log(i, f, empty, fillds)
                 }
             }
         }

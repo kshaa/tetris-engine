@@ -74,7 +74,6 @@ import $____mechanics_mechanics from './mechanics/mechanics';
             this._game.settings.playing = true
         }
         this.togglePause = function() {
-            console.log('toggle')
             this._game.settings.playing = !this._game.settings.playing
         }
         this.delay = function() {
@@ -89,9 +88,9 @@ import $____mechanics_mechanics from './mechanics/mechanics';
         this.start = function(wait) {
             if (typeof(this._game.settings.startedAt) !== 'undefined') {
                 // Get set
-                this._game = new Gamestate()
-                this._randomize = new Randomize(seed)
-                this._mechanics = new Mechanics(this._game, this._randomize)
+                this._game = new state()
+                this._randomize = new randomize(seed)
+                this._mechanics = new mechanics(this._game, this._randomize)
             }
 
             // Ready

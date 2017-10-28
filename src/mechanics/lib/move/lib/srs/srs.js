@@ -9,11 +9,8 @@ function(Rotate, Offset) {
 
             for (let offset of offsets) {
                 let clone = JSON.parse(JSON.stringify(rotated))
-                console.log('oldx: ', clone.x)
-                console.log('offset: ', offset[0])
                 clone.x += offset[0]
                 clone.y -= offset[1]
-                console.log('newx: ', clone.x)
                 clone.rotation = this._offset.clockwiseKey(
                     clone.rotation.toString()
                 )
