@@ -47,8 +47,8 @@ define(function(require) {
                     empty.fill(0)
                     empty = [empty]
                     g.frame.field = empty.concat(
-                        f.splice(0, i).concat(
-                            f.splice(i+1, f.length - i - 1)
+                        f.slice(0, i).concat(
+                            f.slice(i+1)
                         )
                     )
                 }

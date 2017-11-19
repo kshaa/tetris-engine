@@ -1,5 +1,8 @@
 # Tetris engine
-## Features / Specifications
+## Features
+* It kind of works
+* The most spaghettified, janky code I've ever written, I think.
+    (This is code is really difficult to maintain, so I mostly don't )
 * [7 system / random bag](https://tetris.wiki/Random_Generator) tetromino generation
     (Long run without a desired tetromino is less likely)
 * Seed-based tetromino generation
@@ -8,8 +11,7 @@
     (Rotation around walls, T-Spins, magical tetris saves)
 
 ## Bugs
-* If a line above the 0th is cleared, the field shrinks by one line
-    and doesn't regenerate an empty line at the top :D
+* Who knows what this janky code might produce! 
 
 # Compiling
 To compile, run this:
@@ -19,4 +21,13 @@ To compile, run this:
 
     # Compile
     npm run build
+```
+
+To hackily compile for use in ES6 code, run this:
+```
+    # Get dependencies
+    npm install
+
+    # Compile
+    ./node_modules/.bin/amdtoes6 src/engine.js > src/engine.es6.js
 ```
