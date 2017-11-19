@@ -1,8 +1,10 @@
 define(function(require) {
     var move = require('./lib/move/move')
+    var validator = require('./lib/move/lib/validator/validator')
 
     return function Mechanics(g, r) {
         this._move = new move(g)
+        this._validator = new validator(g)
         this.move = this._move.move.bind(this._move)
         this.field = function() {
             let justfield = JSON.parse(JSON.stringify(g.frame.field))
@@ -23,7 +25,12 @@ define(function(require) {
         this.spawn = function() {
             if (!g.frame.piece.active) {
                 g.frame.piece = r.tetromino()
-                g.frame.piece.active = true
+
+                if (this._validator._fits(g.frame.piece)) {
+                    g.frame.piece.active = true
+                } else {
+                    g.settings.lost = true
+                }
             }
         }
         this.flushMoves = function() {

@@ -15,18 +15,20 @@ define(function(require) {
 
         // Info
 
+        this.lost = this._game.settings.lost
         this.seed = this._randomize.seed
         this.field = this._mechanics.field
 
         // Loop
-        
+
         this._main = function() {
             var fps = 60,
                 delta = this._logTime();
 
             this.hook._runBefores(this, delta)
             if (this._game.settings.playing &&
-                !this._game.settings.delayed) {
+                !this._game.settings.delayed &&
+                !this._game.settings.lost) {
                 this._mechanics.spawn()
                 this._mechanics.move()
                 this._mechanics.flushMoves()

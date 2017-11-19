@@ -7,12 +7,13 @@ define(function() {
             droppedAt: 0,
             startedAt: undefined,
             playing: false,
+            lost: false,
             delayed: false, // Animation induced delay
             delayTime: 300,
             frameId: undefined,
             locking: false,
             lockingSince: 0,
-            lockTime: 500 
+            lockTime: 500
         }
         this.frame = {
             time: 0, // Last computation end time (ms)
@@ -27,7 +28,7 @@ define(function() {
             moves: new Array(), // [ Char ] Moves to be executed
             field: undefined // [ [ (Tetromino type) ] ]
         }
-        
+
         // Create empty field
         this.frame.field = new Array(this.settings.height)
         for (i = 0; i < this.settings.height; i++) {
