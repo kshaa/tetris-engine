@@ -60,7 +60,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 1);
+/******/ 	return __webpack_require__(__webpack_require__.s = 2);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -120,11 +120,72 @@ var __WEBPACK_AMD_DEFINE_RESULT__;
 "use strict";
 var __WEBPACK_AMD_DEFINE_RESULT__;
 
+!(__WEBPACK_AMD_DEFINE_RESULT__ = function () {
+    return function Validator(g) {
+        this.check = function (ts) {
+            return ts.find(this.fits.bind(this));
+        };
+        this.fits = function (t) {
+            if (this._inbounds(t)) {
+                return this._fits(t);
+            } else {
+                return false;
+            }
+        };
+        this._inbounds = function (t) {
+            var fits = true;
+            for (i = 0; i < t.tetramino.length; i++) {
+                for (j = 0; j < t.tetramino[0].length; j++) {
+                    if (t.tetramino[i][j] != 0) {
+                        var pixelfits = this._inboundsPixel(t.x + j, t.y + i);
+                        fits = fits && pixelfits;
+                    }
+                }
+            }
+            return fits;
+        };
+        this._inboundsPixel = function (x, y) {
+            var f = g.frame.field;
+            var overzeroes = x >= 0 && y >= 0;
+            var beforewall = x < f[0].length;
+            var beforeground = y < f.length;
+            return overzeroes && beforewall && beforeground;
+        };
+        this._fits = function (t) {
+            // Does a tetromino fit in position at boolean field
+            var f = g.frame.field;
+            var x = t['x'];
+            var y = t['y'];
+            var d = t['tetramino'];
+            for (i = 0; i < d.length; i++) {
+                for (j = 0; j < d[0].length; j++) {
+                    if (d[i][j] != 0) {
+                        var fieldValue = f[i + y][j + x];
+                        var tetrominoValue = d[i][j];
+                        if (fieldValue != 0 && tetrominoValue != 0) {
+                            return false;
+                        }
+                    }
+                }
+            }
+            return true;
+        };
+    };
+}.call(exports, __webpack_require__, exports, module),
+				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+
+/***/ }),
+/* 2 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+var __WEBPACK_AMD_DEFINE_RESULT__;
+
 !(__WEBPACK_AMD_DEFINE_RESULT__ = function (require) {
-    var state = __webpack_require__(2),
-        hook = __webpack_require__(3),
-        randomize = __webpack_require__(4),
-        mechanics = __webpack_require__(6);
+    var state = __webpack_require__(3),
+        hook = __webpack_require__(4),
+        randomize = __webpack_require__(5),
+        mechanics = __webpack_require__(7);
 
     return function TetrisEngine(seed) {
 
@@ -132,7 +193,7 @@ var __WEBPACK_AMD_DEFINE_RESULT__;
 
         this.hook = new hook();
         this._game = new state();
-        this._randomize = new randomize();
+        this._randomize = new randomize(seed);
         this._mechanics = new mechanics(this._game, this._randomize);
 
         // Info
@@ -142,6 +203,10 @@ var __WEBPACK_AMD_DEFINE_RESULT__;
 
         // Loop
 
+        if (!seed) {
+            seed = this.seed(); // Or else .start(seed) will trigger seed regeneration
+        }
+
         this._main = function () {
             var _this = this;
 
@@ -149,7 +214,7 @@ var __WEBPACK_AMD_DEFINE_RESULT__;
                 delta = this._logTime();
 
             this.hook._runBefores(this, delta);
-            if (this._game.settings.playing && !this._game.settings.delayed) {
+            if (this._game.settings.playing && !this._game.settings.delayed && !this._game.settings.lost) {
                 this._mechanics.spawn();
                 this._mechanics.move();
                 this._mechanics.flushMoves();
@@ -190,7 +255,6 @@ var __WEBPACK_AMD_DEFINE_RESULT__;
             this._game.settings.playing = true;
         };
         this.togglePause = function () {
-            console.log('toggle');
             this._game.settings.playing = !this._game.settings.playing;
         };
         this.delay = function () {
@@ -205,9 +269,9 @@ var __WEBPACK_AMD_DEFINE_RESULT__;
         this.start = function (wait) {
             if (typeof this._game.settings.startedAt !== 'undefined') {
                 // Get set
-                this._game = new Gamestate();
-                this._randomize = new Randomize(seed);
-                this._mechanics = new Mechanics(this._game, this._randomize);
+                this._game = new state();
+                this._randomize = new randomize(seed);
+                this._mechanics = new mechanics(this._game, this._randomize);
             }
 
             // Ready
@@ -227,12 +291,15 @@ var __WEBPACK_AMD_DEFINE_RESULT__;
             this.stop();
             this.start();
         };
+        this.settings = function () {
+            return this._game.settings;
+        };
     };
 }.call(exports, __webpack_require__, exports, module),
 				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 
 /***/ }),
-/* 2 */
+/* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -247,6 +314,7 @@ var __WEBPACK_AMD_DEFINE_RESULT__;
             droppedAt: 0,
             startedAt: undefined,
             playing: false,
+            lost: false,
             delayed: false, // Animation induced delay
             delayTime: 300,
             frameId: undefined,
@@ -271,14 +339,14 @@ var __WEBPACK_AMD_DEFINE_RESULT__;
             // Create empty field
         };this.frame.field = new Array(this.settings.height);
         for (i = 0; i < this.settings.height; i++) {
-            field[i] = new Array(this.settings.width).fill(0);
+            this.frame.field[i] = new Array(this.settings.width).fill(0);
         }
     };
 }.call(exports, __webpack_require__, exports, module),
 				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 
 /***/ }),
-/* 3 */
+/* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -311,79 +379,82 @@ var __WEBPACK_AMD_DEFINE_RESULT__;
 				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 
 /***/ }),
-/* 4 */
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 var __WEBPACK_AMD_DEFINE_RESULT__;
 
 !(__WEBPACK_AMD_DEFINE_RESULT__ = function (require) {
-    var tetrominos = __webpack_require__(5);
+    var tetrominos = __webpack_require__(6);
 
     return function Randomize(seed) {
+        var randomizer = this;
         if (typeof seed === 'undefined') {
             this._seed = Math.round(Math.random() * Math.pow(10, 17));
         } else {
             this._seed = seed;
         }
+        console.log(this._seed);
         this._id = 0;
         this._keys = new Array();
         this._tetrominos = tetrominos;
         this._random = function () {
             // Random value from sin with seed
-            var x = Math.sin(this._seed++) * 10000;
+            var x = Math.sin(randomizer._seed++) * 10000;
             return x - Math.floor(x);
         };
         this._populate = function () {
             // Shuffle tetrominos w/ Fisher-Yates algorithm
-            var array = Object.keys(this._tetrominos);
+            var array = Object.keys(randomizer._tetrominos);
             var currentIndex = array.length,
                 temporaryValue,
                 randomIndex;
 
             while (0 !== currentIndex) {
-                randomIndex = Math.floor(Math.random() * currentIndex);
+                randomIndex = Math.floor(randomizer._random() * currentIndex);
                 currentIndex -= 1;
                 temporaryValue = array[currentIndex];
                 array[currentIndex] = array[randomIndex];
                 array[randomIndex] = temporaryValue;
             }
 
-            this._keys = this._keys.concat(array);
+            randomizer._keys = randomizer._keys.concat(array);
         };
         this._stock = function () {
-            if ((this._id + 1) % 7 == 1) {
-                this._populate();
+            if ((randomizer._id + 1) % 7 == 1) {
+                randomizer._populate();
             }
         }, this._getTetrominoFromKey = function (key) {
-            var tetromino = this._tetrominos[key];
+            var tetromino = randomizer._tetrominos[key];
             var clone = JSON.parse(JSON.stringify(tetromino));
             clone['key'] = key;
             clone['active'] = false;
             return clone;
         };
         this._getTetrominoLast = function () {
-            var key = this._keys[this._id];
-            var tetromino = this._getTetrominoFromKey(key);
-            this._id++;
+            var key = randomizer._keys[randomizer._id];
+            var tetromino = randomizer._getTetrominoFromKey(key);
+            randomizer._id++;
             return tetromino;
         };
         this.seed = function (s) {
+            console.log(s, arguments, arguments.length);
             if (arguments.length == 0) {
-                return this._seed;
+                return randomizer._seed;
             } else {
-                this._seed = s;
+                randomizer._seed = s;
             }
         }, this.tetromino = function () {
-            this._stock();
-            return this._getTetrominoLast();
+            randomizer._stock();
+            return randomizer._getTetrominoLast();
         };
     };
 }.call(exports, __webpack_require__, exports, module),
 				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 
 /***/ }),
-/* 5 */
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -437,17 +508,19 @@ var __WEBPACK_AMD_DEFINE_RESULT__;
 });
 
 /***/ }),
-/* 6 */
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 var __WEBPACK_AMD_DEFINE_RESULT__;
 
 !(__WEBPACK_AMD_DEFINE_RESULT__ = function (require) {
-    var move = __webpack_require__(7);
+    var move = __webpack_require__(8);
+    var validator = __webpack_require__(1);
 
     return function Mechanics(g, r) {
         this._move = new move(g);
+        this._validator = new validator(g);
         this.move = this._move.move.bind(this._move);
         this.field = function () {
             var justfield = JSON.parse(JSON.stringify(g.frame.field));
@@ -458,7 +531,6 @@ var __WEBPACK_AMD_DEFINE_RESULT__;
                     for (j = 0; j < t[0].length; j++) {
                         if (t[i][j] != 0) {
                             var val = t[i][j];
-                            console.log(justfield, piece, i, j);
                             justfield[piece.y + i][piece.x + j] = val ? piece.key : '0';
                         }
                     }
@@ -469,7 +541,12 @@ var __WEBPACK_AMD_DEFINE_RESULT__;
         this.spawn = function () {
             if (!g.frame.piece.active) {
                 g.frame.piece = r.tetromino();
-                g.frame.piece.active = true;
+
+                if (this._validator._fits(g.frame.piece)) {
+                    g.frame.piece.active = true;
+                } else {
+                    g.settings.lost = true;
+                }
             }
         };
         this.flushMoves = function () {
@@ -492,8 +569,7 @@ var __WEBPACK_AMD_DEFINE_RESULT__;
                     var empty = new Array(g.settings.width);
                     empty.fill(0);
                     empty = [empty];
-                    g.frame.field = empty.concat(f.splice(0, i).concat(f.splice(i + 1, f.length - i - 1)));
-                    console.log(i, f, empty, fillds);
+                    g.frame.field = empty.concat(f.slice(0, i).concat(f.slice(i + 1)));
                 }
             }
         };
@@ -519,13 +595,13 @@ var __WEBPACK_AMD_DEFINE_RESULT__;
 				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 
 /***/ }),
-/* 7 */
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;
 
-!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, __webpack_require__(8), __webpack_require__(0), __webpack_require__(11)], __WEBPACK_AMD_DEFINE_RESULT__ = function (require, SRS, Rotate, Validator) {
+!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, __webpack_require__(9), __webpack_require__(0), __webpack_require__(1)], __WEBPACK_AMD_DEFINE_RESULT__ = function (require, SRS, Rotate, Validator) {
     return function Move(g) {
         this._srs = new SRS();
         this._rotate = new Rotate();
@@ -649,7 +725,6 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;
             switch (move.toLowerCase()) {
                 case 'cw':
                     pieces = this._srs.rotateClockwise(piece);
-                    console.log(pieces);
                     break;
                 case 'ccw':
                     pieces = this._srs.rotateAnticlockwise(piece);
@@ -674,7 +749,6 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;
                     pieces.push(this._drop(clone));
                     break;
                 default:
-                    console.log('Unknown movement key in Mechanics: "' + move.toLowerCase() + '"');
                     break;
             }
             return this._validator.check(pieces);
@@ -684,13 +758,13 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;
 				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 
 /***/ }),
-/* 8 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;
 
-!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(0), __webpack_require__(9)], __WEBPACK_AMD_DEFINE_RESULT__ = function (Rotate, Offset) {
+!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(0), __webpack_require__(10)], __WEBPACK_AMD_DEFINE_RESULT__ = function (Rotate, Offset) {
     return function SRS() {
         this.rotateClockwise = function (t) {
             var clone = JSON.parse(JSON.stringify(t));
@@ -707,11 +781,8 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;
                     var offset = _step.value;
 
                     var _clone = JSON.parse(JSON.stringify(rotated));
-                    console.log('oldx: ', _clone.x);
-                    console.log('offset: ', offset[0]);
                     _clone.x += offset[0];
                     _clone.y -= offset[1];
-                    console.log('newx: ', _clone.x);
                     _clone.rotation = this._offset.clockwiseKey(_clone.rotation.toString());
                     pieces.push(_clone);
                 }
@@ -776,13 +847,13 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;
 				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 
 /***/ }),
-/* 9 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;
 
-!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(10)], __WEBPACK_AMD_DEFINE_RESULT__ = function (Wallkicks) {
+!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(11)], __WEBPACK_AMD_DEFINE_RESULT__ = function (Wallkicks) {
     return function Offset() {
         this.clockwise = function (t) {
             var r1 = t.rotation.toString();
@@ -814,7 +885,6 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;
                 var y = w1[i][1] - w2[i][1];
                 offsets[i] = [x, y];
             }
-            console.log(offsets);
             return offsets;
         };
         this._rotations = ['0', 'r', '2', 'l'];
@@ -824,7 +894,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;
 				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 
 /***/ }),
-/* 10 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -854,67 +924,6 @@ var __WEBPACK_AMD_DEFINE_RESULT__;
         this.s = this.j;
         this.t = this.j;
         this.z = this.j;
-    };
-}.call(exports, __webpack_require__, exports, module),
-				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
-
-/***/ }),
-/* 11 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-var __WEBPACK_AMD_DEFINE_RESULT__;
-
-!(__WEBPACK_AMD_DEFINE_RESULT__ = function () {
-    return function Validator(g) {
-        this.check = function (ts) {
-            return ts.find(this.fits.bind(this));
-        };
-        this.fits = function (t) {
-            if (this._inbounds(t)) {
-                return this._fits(t);
-            } else {
-                return false;
-            }
-        };
-        this._inbounds = function (t) {
-            var fits = true;
-            for (i = 0; i < t.tetramino.length; i++) {
-                for (j = 0; j < t.tetramino[0].length; j++) {
-                    if (t.tetramino[i][j] != 0) {
-                        var pixelfits = this._inboundsPixel(t.x + j, t.y + i);
-                        fits = fits && pixelfits;
-                    }
-                }
-            }
-            return fits;
-        };
-        this._inboundsPixel = function (x, y) {
-            var f = g.frame.field;
-            var overzeroes = x >= 0 && y >= 0;
-            var beforewall = x < f[0].length;
-            var beforeground = y < f.length;
-            return overzeroes && beforewall && beforeground;
-        };
-        this._fits = function (t) {
-            // Does a tetromino fit in position at boolean field
-            var f = g.frame.field;
-            var x = t['x'];
-            var y = t['y'];
-            var d = t['tetramino'];
-            for (i = 0; i < d.length; i++) {
-                for (j = 0; j < d[0].length; j++) {
-                    if (d[i][j] != 0) {
-                        var fieldValue = f[i + y][j + x];
-                        var tetrominoValue = d[i][j];
-                        if (fieldValue != 0 && tetrominoValue != 0) {
-                            return false;
-                        }
-                    }
-                }
-            }
-            return true;
-        };
     };
 }.call(exports, __webpack_require__, exports, module),
 				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));

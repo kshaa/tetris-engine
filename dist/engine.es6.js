@@ -13,7 +13,7 @@ import $____mechanics_mechanics from './mechanics/mechanics';
 
         this.hook       = new hook()
         this._game      = new state()
-        this._randomize = new randomize()
+        this._randomize = new randomize(seed)
         this._mechanics = new mechanics(this._game, this._randomize)
 
         // Info
@@ -22,14 +22,19 @@ import $____mechanics_mechanics from './mechanics/mechanics';
         this.field = this._mechanics.field
 
         // Loop
-        
+
+        if (!seed) {
+            seed = this.seed() // Or else .start(seed) will trigger seed regeneration
+        }
+
         this._main = function() {
             var fps = 60,
                 delta = this._logTime();
 
             this.hook._runBefores(this, delta)
             if (this._game.settings.playing &&
-                !this._game.settings.delayed) {
+                !this._game.settings.delayed &&
+                !this._game.settings.lost) {
                 this._mechanics.spawn()
                 this._mechanics.move()
                 this._mechanics.flushMoves()
@@ -74,7 +79,6 @@ import $____mechanics_mechanics from './mechanics/mechanics';
             this._game.settings.playing = true
         }
         this.togglePause = function() {
-            console.log('toggle')
             this._game.settings.playing = !this._game.settings.playing
         }
         this.delay = function() {
@@ -89,9 +93,9 @@ import $____mechanics_mechanics from './mechanics/mechanics';
         this.start = function(wait) {
             if (typeof(this._game.settings.startedAt) !== 'undefined') {
                 // Get set
-                this._game = new Gamestate()
-                this._randomize = new Randomize(seed)
-                this._mechanics = new Mechanics(this._game, this._randomize)
+                this._game = new state()
+                this._randomize = new randomize(seed)
+                this._mechanics = new mechanics(this._game, this._randomize)
             }
 
             // Ready
@@ -110,6 +114,9 @@ import $____mechanics_mechanics from './mechanics/mechanics';
         this.restart = function() {
             this.stop()
             this.start()
+        }
+        this.settings = function() {
+            return this._game.settings;
         }
     }
 

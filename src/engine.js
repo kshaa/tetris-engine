@@ -10,16 +10,19 @@ define(function(require) {
 
         this.hook       = new hook()
         this._game      = new state()
-        this._randomize = new randomize()
+        this._randomize = new randomize(seed)
         this._mechanics = new mechanics(this._game, this._randomize)
 
         // Info
 
-        this.lost = this._game.settings.lost
         this.seed = this._randomize.seed
         this.field = this._mechanics.field
 
         // Loop
+
+        if (!seed) {
+            seed = this.seed() // Or else .start(seed) will trigger seed regeneration
+        }
 
         this._main = function() {
             var fps = 60,
@@ -108,6 +111,9 @@ define(function(require) {
         this.restart = function() {
             this.stop()
             this.start()
+        }
+        this.settings = function() {
+            return this._game.settings;
         }
     }
 })
