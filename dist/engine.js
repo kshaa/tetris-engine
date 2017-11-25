@@ -213,8 +213,9 @@ var __WEBPACK_AMD_DEFINE_RESULT__;
             var fps = 60,
                 delta = this._logTime();
 
-            this.hook._runBefores(this, delta);
             if (this._game.settings.playing && !this._game.settings.delayed && !this._game.settings.lost) {
+                this.hook._runBefores(this, delta);
+
                 this._mechanics.spawn();
                 this._mechanics.move();
                 this._mechanics.flushMoves();
@@ -222,8 +223,9 @@ var __WEBPACK_AMD_DEFINE_RESULT__;
                     _this._mechanics.storePiece.bind(_this._mechanics)();
                     _this._mechanics.removeFilled.bind(_this._mechanics)();
                 });
+
+                this.hook._runAfters(this, delta);
             }
-            this.hook._runAfters(this, delta);
 
             setTimeout(function () {
                 window.requestAnimationFrame(_this._main.bind(_this));
@@ -374,6 +376,10 @@ var __WEBPACK_AMD_DEFINE_RESULT__;
             }
         };
         this._afters = new Array(); // Functions to run after each frame
+        this.killHooks = function () {
+            this._befores = new Array(); // Functions to run before each frame
+            this._afters = new Array(); // Functions to run after each frame
+        };
     };
 }.call(exports, __webpack_require__, exports, module),
 				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
@@ -607,6 +613,9 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;
         this._rotate = new Rotate();
         this._validator = new Validator(g);
         this._intentional = function () {
+            // For some reason multiple moves don't work
+            // So keep only latest move
+            g.frame.moves = g.frame.moves.slice(-1);
             var _iteratorNormalCompletion = true;
             var _didIteratorError = false;
             var _iteratorError = undefined;

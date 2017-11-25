@@ -28,10 +28,11 @@ define(function(require) {
             var fps = 60,
                 delta = this._logTime();
 
-            this.hook._runBefores(this, delta)
             if (this._game.settings.playing &&
                 !this._game.settings.delayed &&
                 !this._game.settings.lost) {
+                this.hook._runBefores(this, delta)
+
                 this._mechanics.spawn()
                 this._mechanics.move()
                 this._mechanics.flushMoves()
@@ -43,8 +44,9 @@ define(function(require) {
                         this._mechanics
                     )()
                 })
+
+                this.hook._runAfters(this, delta)
             }
-            this.hook._runAfters(this, delta)
 
             setTimeout(() => {
                 window.requestAnimationFrame(this._main.bind(this))

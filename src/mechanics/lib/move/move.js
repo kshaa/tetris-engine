@@ -5,6 +5,9 @@ define(["require", "./lib/srs/srs", "./lib/srs/lib/rotate/rotate", "./lib/valida
             this._rotate = new Rotate()
             this._validator = new Validator(g)
             this._intentional = function() {
+                // For some reason multiple moves don't work
+                // So keep only latest move
+                g.frame.moves = g.frame.moves.slice(-1)
                 for (var move of g.frame.moves) {
                     this._set(move)
                 }

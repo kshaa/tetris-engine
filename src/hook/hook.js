@@ -20,6 +20,10 @@ define(function() {
             }
         }
         this._afters = new Array() // Functions to run after each frame
+        this.killHooks = function() {
+            this._befores = new Array() // Functions to run before each frame
+            this._afters = new Array() // Functions to run after each frame
+        }
     }
 })
 
