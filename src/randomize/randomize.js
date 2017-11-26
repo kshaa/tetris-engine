@@ -8,7 +8,6 @@ define(function(require) {
         } else {
             this._seed = seed
         }
-        console.log(this._seed)
         this._id = 0
         this._keys = new Array()
         this._tetrominos = tetrominos
@@ -49,7 +48,6 @@ define(function(require) {
             return tetromino
         }
         this.seed = function(s) {
-            console.log(s, arguments, arguments.length)
             if (arguments.length == 0) {
                 return randomizer._seed
             } else {

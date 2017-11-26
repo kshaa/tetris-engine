@@ -17,6 +17,9 @@ define(function(require) {
 
         this.seed = this._randomize.seed
         this.field = this._mechanics.field
+        this.linesDropped = function() {
+            return this._game.frame.linesDropped
+        }
 
         // Loop
 
@@ -33,6 +36,8 @@ define(function(require) {
                 !this._game.settings.lost) {
                 this.hook._runBefores(this, delta)
 
+                this._game.frame.linesDropped = 0
+                this._mechanics.addNewlines()
                 this._mechanics.spawn()
                 this._mechanics.move()
                 this._mechanics.flushMoves()
@@ -68,6 +73,9 @@ define(function(require) {
 
         // Interactions
 
+        this.addLines = function(count) {
+            this._game.newLines += count
+        }
         this.move = function(key) {
             this._game.frame.moves.push(key);
         }

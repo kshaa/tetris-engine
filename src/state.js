@@ -16,6 +16,7 @@ define(function() {
             lockTime: 500
         }
         this.frame = {
+            linesDropped: 0,
             time: 0, // Last computation end time (ms)
             piece: { // Current tetromino piece on field
                 active: false,

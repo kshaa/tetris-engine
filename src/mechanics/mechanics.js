@@ -47,6 +47,7 @@ define(function(require) {
                     return (val == 0)
                 }))
             })
+            g.frame.linesDropped = fillds.filter(function(val) { return val }).length
             for (i = 0; i < fillds.length; i++) {
                 let f = g.frame.field
                 if (fillds[i]) {
@@ -58,6 +59,35 @@ define(function(require) {
                             f.slice(i+1)
                         )
                     )
+                }
+            }
+        }
+        this.addNewlines = function() {
+            if (!g.frame.piece.active) {
+                let linesToBeAdded = g.frame.newLines
+                let firstFilledRowIndex = g.frame.field.findIndex(function(row) {
+                    let firstFilledCellIndex = row.findIndex(function(cell) {
+                        return cell !== 0
+                    })
+
+                    return firstFilledCellIndex !== -1
+                })
+                // If collides with first three spawn lines -> lose
+                // Else add the lines
+                let reserved = firstFilledRowIndex + linesToBeAdded
+                if (reserved <= 2  && reserved !== -1) {
+                    g.settings.lost = true
+                } else {
+                    g.frame.field = g.frame.field.splice(linesToBeAdded)
+
+                    for (let i = 0; i < linesToBeAdded; i++) {
+                        let width = g.settings.width
+                        let filledLine = new Array(width).fill('x')
+                        filledLine[Math.round(Math.random() * (width - 1))] = 0
+                        g.frame.field.push(filledLine)
+                    }
+
+                    g.frame.newLines = 0
                 }
             }
         }

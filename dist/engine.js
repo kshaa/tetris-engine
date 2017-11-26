@@ -200,6 +200,9 @@ var __WEBPACK_AMD_DEFINE_RESULT__;
 
         this.seed = this._randomize.seed;
         this.field = this._mechanics.field;
+        this.linesDropped = function () {
+            return this._game.frame.linesDropped;
+        };
 
         // Loop
 
@@ -216,6 +219,8 @@ var __WEBPACK_AMD_DEFINE_RESULT__;
             if (this._game.settings.playing && !this._game.settings.delayed && !this._game.settings.lost) {
                 this.hook._runBefores(this, delta);
 
+                this._game.frame.linesDropped = 0;
+                this._mechanics.addNewlines();
                 this._mechanics.spawn();
                 this._mechanics.move();
                 this._mechanics.flushMoves();
@@ -247,6 +252,9 @@ var __WEBPACK_AMD_DEFINE_RESULT__;
 
         // Interactions
 
+        this.addLines = function (count) {
+            this._game.newLines += count;
+        };
         this.move = function (key) {
             this._game.frame.moves.push(key);
         };
@@ -325,6 +333,7 @@ var __WEBPACK_AMD_DEFINE_RESULT__;
             lockTime: 500
         };
         this.frame = {
+            linesDropped: 0,
             time: 0, // Last computation end time (ms)
             piece: { // Current tetromino piece on field
                 active: false,
@@ -401,7 +410,6 @@ var __WEBPACK_AMD_DEFINE_RESULT__;
         } else {
             this._seed = seed;
         }
-        console.log(this._seed);
         this._id = 0;
         this._keys = new Array();
         this._tetrominos = tetrominos;
@@ -445,7 +453,6 @@ var __WEBPACK_AMD_DEFINE_RESULT__;
             return tetromino;
         };
         this.seed = function (s) {
-            console.log(s, arguments, arguments.length);
             if (arguments.length == 0) {
                 return randomizer._seed;
             } else {
@@ -569,6 +576,9 @@ var __WEBPACK_AMD_DEFINE_RESULT__;
                     return val == 0;
                 });
             });
+            g.frame.linesDropped = fillds.filter(function (val) {
+                return val;
+            }).length;
             for (i = 0; i < fillds.length; i++) {
                 var f = g.frame.field;
                 if (fillds[i]) {
@@ -576,6 +586,35 @@ var __WEBPACK_AMD_DEFINE_RESULT__;
                     empty.fill(0);
                     empty = [empty];
                     g.frame.field = empty.concat(f.slice(0, i).concat(f.slice(i + 1)));
+                }
+            }
+        };
+        this.addNewlines = function () {
+            if (!g.frame.piece.active) {
+                var linesToBeAdded = g.frame.newLines;
+                var firstFilledRowIndex = g.frame.field.findIndex(function (row) {
+                    var firstFilledCellIndex = row.findIndex(function (cell) {
+                        return cell !== 0;
+                    });
+
+                    return firstFilledCellIndex !== -1;
+                });
+                // If collides with first three spawn lines -> lose
+                // Else add the lines
+                var reserved = firstFilledRowIndex + linesToBeAdded;
+                if (reserved <= 2 && reserved !== -1) {
+                    g.settings.lost = true;
+                } else {
+                    g.frame.field = g.frame.field.splice(linesToBeAdded);
+
+                    for (var _i = 0; _i < linesToBeAdded; _i++) {
+                        var width = g.settings.width;
+                        var filledLine = new Array(width).fill('x');
+                        filledLine[Math.round(Math.random() * (width - 1))] = 0;
+                        g.frame.field.push(filledLine);
+                    }
+
+                    g.frame.newLines = 0;
                 }
             }
         };
