@@ -74,7 +74,7 @@ define(function(require) {
         // Interactions
 
         this.addLines = function(count) {
-            this._game.newLines += count
+            this._game.frame.newLines += count
         }
         this.move = function(key) {
             this._game.frame.moves.push(key);
